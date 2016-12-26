@@ -88,6 +88,7 @@ Debian 8 64-bit:
   except:
     - master
     - qaul-ng
+    - MostlyBroken
   tags:
     - debian8_64
 
@@ -98,6 +99,7 @@ Debian 8 32-bit:
   except:
     - master
     - qaul-ng
+    - MostlyBroken
   tags:
     - debian8_32
 
@@ -109,6 +111,7 @@ OSX 10.6:
   except:
     - master
     - qaul-ng
+    - MostlyBroken
   tags:
     - osx_10.6
 
@@ -122,6 +125,7 @@ Android:
   except:
     - master
     - qaul-ng
+    - MostlyBroken
   tags:
     - android
 
@@ -136,5 +140,64 @@ Windows:
   except:
     - master
     - qaul-ng
+    - MostlyBroken
   tags:
     - windows
+
+###################################################
+# MostlyBroken Builds
+# Experimental repositories, inofficial keys
+###################################################
+
+MostlyBroken Android:
+  stage: build
+  cache:
+    paths:
+        - archives/
+  script:
+    - mkdir build; cd build
+    - cmake .. -DPORT=ANDROID -DQAUL_ANDROID_VERSION_NAME="1.0b5.${CI_PIPELINE_ID}" -DQAUL_ANDROID_VERSION_CODE=${CI_PIPELINE_ID} -DSDK_ROOT=/home/saces/android-sdk -DNDK_ROOT=/home/saces/android-sdk/ndk-bundle -DEXTRALIB_PATH=/home/saces/qaul-extralib
+    - make
+    - cp android/app/src/main/bin/QaulActivity-debug.apk ~/experimental/fdroid/repo/QaulActivity-debug_${CI_PIPELINE_ID}.apk
+  only:
+    - MostlyBroken
+  tags:
+    - android
+    - MostlyBroken
+
+MostlyBroken Android deploy:
+  stage: deploy
+  script:
+    - cd ~/experimental/fdroid
+    - fdroid update
+    - ~/bin/android.sh
+  only:
+    - MostlyBroken
+  tags:
+    - android
+    - MostlyBroken
+
+MostlyBroken Ubuntu 16.04 64bit:
+  stage: build
+  cache:
+    paths:
+        - archives/
+  script:
+    - mkdir build; cd build; cmake .. -DQAUL_ANDROID_VERSION_CODE=${CI_PIPELINE_ID}; make package
+    - cp *.deb ~/experimental/ubuntu-raw
+  only:
+    - MostlyBroken
+  tags:
+    - debian
+    - MostlyBroken
+
+MostlyBroken Ubuntu deploy:
+  stage: deploy
+  script:
+    - ~/bin/ubuntu.sh
+  only:
+    - MostlyBroken
+  tags:
+    - debian
+    - MostlyBroken
+
